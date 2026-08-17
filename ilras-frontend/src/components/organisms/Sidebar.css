@@ -1,0 +1,104 @@
+.sidebar {
+  width: 236px;
+  flex-shrink: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 22px;
+}
+.sidebar__ring-mini {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--dim-connectivity) 0 14%,
+    var(--dim-accessibility) 14% 28%,
+    var(--dim-infrastructure) 28% 42%,
+    var(--dim-logistics) 42% 57%,
+    var(--dim-industrial) 57% 71%,
+    var(--dim-socio) 71% 85%,
+    var(--dim-risk) 85% 100%
+  );
+}
+.sidebar__brand-text {
+  font-family: var(--font-head);
+  font-weight: 800;
+  color: #fff;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+}
+.sidebar__brand-sub {
+  font-size: 9.5px;
+  color: #8ea6cc;
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+.sidebar__section {
+  font-size: 10px;
+  color: #5f79a6;
+  letter-spacing: 1.5px;
+  padding: 14px 10px 6px;
+  font-weight: 600;
+}
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  margin: 1px 0;
+  color: #c7d5ea;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: background 0.15s;
+  text-decoration: none;
+}
+.sidebar__item svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.sidebar__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.sidebar__item--active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-left: 3px solid var(--color-accent-teal);
+}
+.sidebar__item--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.sidebar__item--disabled:hover {
+  background: none;
+}
+.sidebar__badge {
+  font-size: 8.5px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #b9c7de;
+  padding: 1px 6px;
+  border-radius: 20px;
+  margin-left: auto;
+  letter-spacing: 0.3px;
+}
+.sidebar__foot {
+  margin-top: auto;
+  padding: 12px 10px;
+  font-size: 10.5px;
+  color: #5f79a6;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}

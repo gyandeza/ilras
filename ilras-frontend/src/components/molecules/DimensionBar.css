@@ -1,0 +1,52 @@
+.dimension-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.dimension-bar:last-child {
+  border-bottom: none;
+}
+.dimension-bar__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dimension-bar__label {
+  width: 170px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+  flex-shrink: 0;
+}
+.dimension-bar__flag {
+  display: inline-block;
+  font-size: 9.5px;
+  background: #fdecea;
+  color: var(--band-belum-siap);
+  padding: 2px 7px;
+  border-radius: 10px;
+  margin-left: 6px;
+  font-weight: 600;
+}
+.dimension-bar__track {
+  flex: 1;
+  height: 8px;
+  background: var(--color-line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dimension-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+.dimension-bar__value {
+  width: 34px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}

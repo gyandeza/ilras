@@ -1,0 +1,23 @@
+.score-ring {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.score-ring__hole {
+  position: absolute;
+  inset: 10%;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.score-ring__value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--color-ink);
+  font-size: 1.05em;
+}

@@ -1,0 +1,62 @@
+/* ==========================================================
+   ILRAS Design Tokens — ported 1:1 from Sprint 1 Design System
+   Single source of truth for color, type, spacing, radius.
+   ========================================================== */
+
+:root {
+  /* Color — core */
+  --color-navy-900: #0B2545;
+  --color-primary-600: #1B4B8F;
+  --color-primary-100: #E8EEF7;
+  --color-accent-teal: #0E7C7B;
+  --color-surface: #F7F9FC;
+  --color-ink: #101828;
+  --color-muted: #5B6472;
+  --color-line: #E3E8F0;
+
+  /* Color — semantic readiness bands (Sangat Siap -> Belum Siap) */
+  --band-sangat-siap: #1B7A4A;
+  --band-siap: #3E9C6E;
+  --band-cukup-siap: #C98A1B;
+  --band-kurang-siap: #D2691E;
+  --band-belum-siap: #B3261E;
+
+  /* Color — ILRI dimension palette */
+  --dim-connectivity: #1B4B8F;
+  --dim-accessibility: #0E7C7B;
+  --dim-infrastructure: #3E9C6E;
+  --dim-logistics: #C98A1B;
+  --dim-industrial: #D2691E;
+  --dim-socio: #6D5BA6;
+  --dim-risk: #B3261E;
+
+  /* Typography */
+  --font-head: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.25rem;    /* 20px */
+  --text-xl: 1.5625rem;  /* 25px */
+  --text-2xl: 1.9375rem; /* 31px */
+  --text-3xl: 2.4375rem; /* 39px */
+
+  /* Spacing — 8px base grid */
+  --space-1: 0.5rem;  /* 8px */
+  --space-2: 1rem;    /* 16px */
+  --space-3: 1.5rem;  /* 24px */
+  --space-4: 2rem;    /* 32px */
+  --space-6: 3rem;    /* 48px */
+  --space-8: 4rem;     /* 64px */
+
+  /* Radius */
+  --radius-card: 12px;
+  --radius-pill: 999px;
+
+  /* Glassmorphism — chrome only, per Sprint 1 rule */
+  --glass-bg: rgba(11, 37, 69, 0.94);
+  --glass-blur: 14px;
+  --glass-border: rgba(255, 255, 255, 0.08);
+}

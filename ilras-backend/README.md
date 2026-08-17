@@ -1,0 +1,119 @@
+# ILRAS Backend — Sprint 5
+
+FastAPI + SQLite backend implementing the ILRI scoring engine as the
+single source of truth for the whole system (the frontend no longer
+calculates scores — see `ilras-frontend/src/lib/ilri.js`).
+
+## Run locally
+
+```bash
+pip install -r requirements.txt
+python -m app.seed        # creates ilras.db and seeds pilot data
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+Interactive API docs: http://localhost:8000/docs
+
+## Endpoints
+
+- `GET /api/health`
+- `GET /api/districts` — list all districts (each includes score, band, and lat/lng)
+- `GET /api/districts/{id}` — single district detail (logs an audit entry)
+- `GET /api/districts/{id}/indicators?dimension=infrastructure`
+- `POST /api/districts/{id}/simulate` — body `{"toll": bool, "hub": bool}`,
+  re-enters the same scoring engine used everywhere else, logs an audit entry
+
+## Geospatial data (Sprint 6)
+
+District `lat`/`lng` are approximate centroids, not surveyed cadastral
+boundaries. `geo_precision` is set to `"approximate"` on every seeded
+district — the frontend displays a disclaimer whenever this flag is
+present. Real administrative boundaries would come from BIG's WFS
+service (confirmed accessible in Sprint 0's Data Source Strategy) but
+integrating that is real scope for a later sprint, not a quick add.
+
+## Analytics (Sprint 7)
+
+`GET /api/analytics/compare?ids=a,b,c` (omit `ids` to compare all
+districts) returns cross-district benchmarking: which district leads
+and lags on each of the 7 dimensions, the score spread, and — per
+district — how many points are needed to reach the next readiness
+band (via `ilri.gap_to_next_band()`). This is genuinely new analysis,
+not just the per-district scores already available from `/api/districts`.
+
+## Weighting Methodology (Sprint 8)
+
+Switched from arbitrary, undocumented weights (Connectivity 20%, Risk
+10%, etc.) to **equal weighting** (1/7 per dimension). Rationale,
+citations, known limitations, and the documented path to AHP-based
+revision all live in `ilri.METHODOLOGY` and are exposed via
+`GET /api/methodology`. See `app/ilri.py`'s module docstring for the
+full research basis (World Bank LPI precedent, OECD/JRC Handbook on
+Constructing Composite Indicators).
+
+**This changed real outcomes, not just internals** — bumped
+`METHODOLOGY_VERSION` to `ilri-v1.1-equal-weighting` (recorded in every
+audit log entry going forward). Under the old weights, Tambang scored
+39.1 ("Kurang Siap"); under equal weighting it scores 40.0 ("Cukup
+Siap") — the exact same underlying dimension data now classifies
+differently. This is disclosed prominently in the UI's new
+"Metodologi Skoring" page, not buried in a changelog.
+
+## Scenario Simulation (Sprint 9)
+
+`/simulate` now accepts arbitrary per-dimension `overrides` (a dict of
+`dimension_key -> new_value`) instead of the old hardcoded
+`{toll, hub}` booleans. This is a breaking API change from Sprint
+5/6/7/8 -- nothing else calls this endpoint besides the frontend also
+in this repo, so it was safe to change directly rather than version.
+
+`GET /districts/{id}/presets` returns raw per-dimension **deltas**
+(`ilri.PRESETS`), not absolute values. This was a real bug fix during
+this sprint: an earlier version returned base-relative absolute
+snapshots, which silently overwrote unrelated dimensions when two
+presets were applied in sequence (stacking "Hub" after "Toll" would
+reset Toll's connectivity/accessibility gains back to base values).
+Deltas applied client-side on top of *current* slider state fixed it.
+
+## Recommendation Engine (Sprint 10)
+
+`GET /districts/{id}/recommendation` returns SWOT (Strengths/
+Weaknesses/Opportunities/Threats) and an Investment Priority tier.
+
+**Deliberately NOT a new composite score.** Investment tier
+classification (`ilri.classify_investment_tier`) uses only numbers
+already computed and already justified in Sprint 8 (band + gap-to-
+next-band) -- three rule-based tiers, not a newly invented weighted
+formula. Inventing a second arbitrary scoring scheme here would have
+undermined the entire point of Sprint 8's equal-weighting transparency
+work.
+
+SWOT similarly reuses existing computed values: Strengths/Weaknesses
+are literally the top/bottom dimensions by raw score, Threats maps
+directly onto the existing Risk dimension (a natural, honest fit --
+no new logic), and Opportunity is a narrative built from the
+already-existing `gap_to_next_band()` call.
+
+
+## Architecture notes
+
+- `app/ilri.py` is the ONLY place score calculation and band
+  classification happen anywhere in the system. If the scoring
+  methodology ever changes, this is the one file to touch — bump
+  `METHODOLOGY_VERSION` when you do, since it's recorded in every
+  audit log entry.
+- `app/models.py` includes an `AuditLog` table per Sprint 0's FR-07.
+  There's no viewer UI for it yet (that's Administration, a later
+  sprint) but every score view and every simulation is already being
+  recorded with timestamp and methodology version.
+- CORS is currently open only to local dev ports. Revisit before
+  Sprint 11 (Deployment).
+- No authentication yet — Sprint 0 flagged government SSO as an open
+  question that was never answered. Endpoints are unauthenticated.
+  Do not deploy this publicly as-is.
+
+## Not yet in this sprint
+
+- PostgreSQL/PostGIS migration (Constitution §8 lists this as future work)
+- GIS Engine data (Sprint 6)
+- Administration endpoints for indicator weight management (FR-09)

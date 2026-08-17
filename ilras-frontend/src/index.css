@@ -1,0 +1,45 @@
+@import './styles/tokens.css';
+
+@import './components/atoms/ScoreRing.css';
+@import './components/atoms/BandPill.css';
+@import './components/atoms/Button.css';
+
+@import './components/molecules/DistrictCard.css';
+@import './components/molecules/DimensionBar.css';
+@import './components/molecules/IndicatorItem.css';
+@import './components/molecules/CompareBar.css';
+@import './components/molecules/RecommendationItem.css';
+
+@import './components/organisms/Sidebar.css';
+@import './components/organisms/TopBar.css';
+@import './components/organisms/DistrictMap.css';
+@import './components/organisms/RecommendationPanel.css';
+
+@import './layout/AppLayout.css';
+@import './pages/DashboardPage.css';
+@import './pages/DistrictDetailPage.css';
+@import './pages/SimulationPage.css';
+@import './pages/GISExplorerPage.css';
+@import './pages/ComparisonPage.css';
+@import './pages/MethodologyPage.css';
+
+* {
+  box-sizing: border-box;
+}
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 14px;
+}
+button {
+  font-family: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}

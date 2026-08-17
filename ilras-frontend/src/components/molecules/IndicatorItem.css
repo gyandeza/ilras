@@ -1,0 +1,33 @@
+.indicator-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.indicator-item:last-child {
+  border-bottom: none;
+}
+.indicator-item__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.indicator-item__meta {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  margin-top: 3px;
+}
+.indicator-item__conf {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 9.5px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+.indicator-item__conf--high {
+  background: #e6f4ec;
+  color: var(--band-sangat-siap);
+}
+.indicator-item__conf--medium {
+  background: #fbf0dc;
+  color: var(--band-cukup-siap);
+}

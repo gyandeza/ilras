@@ -1,0 +1,22 @@
+.district-map {
+  margin-top: 16px;
+}
+.district-map .leaflet-container {
+  font-family: var(--font-body);
+}
+.district-map__empty {
+  border-radius: var(--radius-card);
+  background: repeating-linear-gradient(45deg, #eef2f8, #eef2f8 8px, #e4e9f2 8px, #e4e9f2 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.district-map__disclaimer {
+  font-size: 10.5px;
+  color: var(--color-muted);
+  font-style: italic;
+  margin-top: 6px;
+  text-align: center;
+}

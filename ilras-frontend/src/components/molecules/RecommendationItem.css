@@ -1,0 +1,28 @@
+.recommendation-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.recommendation-item__num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-accent-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.recommendation-item b {
+  font-size: var(--text-sm);
+  display: block;
+  color: #fff;
+}
+.recommendation-item span {
+  font-size: 10.5px;
+  color: #9fb4d6;
+}
