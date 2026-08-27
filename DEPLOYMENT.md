@@ -113,3 +113,12 @@ dropping tables on every build once real data needs to persist.
 Fine for a demo; noticeable and worth upgrading to a paid plan before
 showing this to time-sensitive stakeholders (e.g. a live government
 presentation).
+
+**GIS thematic layers need verification after deploy.** The "Peta"
+page's "Jalan Utama" and "Zona Risiko Banjir" layer toggles call
+OpenStreetMap's Overpass API and BNPB's InaRisk service at runtime.
+These could not be tested from the sandboxed dev environment that
+built them (network egress restricted there) -- after deploying,
+open the Peta page and toggle both on to confirm they actually load
+on Render's real network. The rest of the app (dashboard, simulation,
+comparison, etc.) was fully verified and doesn't depend on this.

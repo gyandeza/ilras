@@ -106,3 +106,15 @@ src/
   consultant-speak filler. This was a deliberate design constraint,
   not an accident.
 - Laporan and Administrasi remain disabled nav placeholders.
+
+## Change Request notes (Lapisan Tematik GIS)
+
+- Peta Kesiapan Wilayah (GIS Explorer) now has two working layer
+  toggles: "Jalan Utama" (OpenStreetMap via backend's Overpass proxy)
+  and "Zona Risiko Banjir" (InaRisk BNPB image overlay).
+- Kawasan Industri stays a disabled placeholder -- honestly, not
+  faked -- since no public API was found for that data (see backend
+  README for the RT-01 research findings).
+- The risk layer overlay MUST keep showing the BNPB disclaimer text
+  whenever it's active -- this is a compliance requirement from
+  BNPB's own terms of use, not an optional UI detail.

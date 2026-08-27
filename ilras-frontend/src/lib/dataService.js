@@ -67,3 +67,13 @@ export async function fetchRecommendation(districtId) {
   const res = await fetch(`${API_BASE}/api/districts/${districtId}/recommendation`);
   return handleResponse(res);
 }
+
+export async function fetchRoadsLayer(districtId) {
+  const res = await fetch(`${API_BASE}/api/districts/${districtId}/layers/roads`);
+  return handleResponse(res);
+}
+
+export async function fetchRiskLayer(districtId) {
+  const res = await fetch(`${API_BASE}/api/districts/${districtId}/layers/risk`);
+  return handleResponse(res);
+}

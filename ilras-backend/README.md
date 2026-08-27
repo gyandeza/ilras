@@ -117,3 +117,32 @@ already-existing `gap_to_next_band()` call.
 - PostgreSQL/PostGIS migration (Constitution §8 lists this as future work)
 - GIS Engine data (Sprint 6)
 - Administration endpoints for indicator weight management (FR-09)
+
+## Change Request — Lapisan Tematik GIS (pasca-Sprint 11)
+
+Menyelesaikan RT-01 (dibuka Sprint 0, dinilai ulang di sini setelah
+konteks berubah -- API pemerintah yang sebelumnya belum diverifikasi
+kini dikonfirmasi live dan dapat diakses).
+
+**Hasil riset RT-01:**
+- **Jalan**: kelayakan tinggi. `app/gis_layers.py` memanggil Overpass
+  API (OpenStreetMap) secara real-time, hasil di-cache 7 hari di tabel
+  `gis_layer_cache` agar tidak membebani layanan pihak ketiga.
+- **Zona Risiko**: kelayakan sedang-tinggi. Overlay gambar dikonstruksi
+  langsung dari endpoint ArcGIS ImageServer InaRisk BNPB
+  (`gis.bnpb.go.id`), lapisan default: Indeks Bahaya Banjir. Disclaimer
+  resmi BNPB WAJIB ditampilkan bersama layer ini (sudah diimplementasikan).
+- **Kawasan Industri**: TETAP belum terselesaikan untuk akses otomatis.
+  Data ada (portal `sepat.riau.go.id/mapki`, sistem SPIN Kemenperin)
+  tapi diblokir robots.txt, tanpa API publik yang ditemukan. Jalan ke
+  depan: permintaan data formal ke Disperindag Riau, atau kurasi manual
+  untuk 3 kecamatan pilot (bukan data fiktif yang terlihat otentik).
+
+**KETERBATASAN PENTING:** endpoint `/layers/roads` dan `/layers/risk`
+melakukan panggilan jaringan keluar ke layanan pihak ketiga saat
+runtime. Ini TIDAK BISA diuji dari sandbox pengembangan Anthropic
+(egress jaringan dibatasi di sana) -- endpoint risiko sudah diverifikasi
+bekerja (hanya konstruksi URL, tidak perlu jaringan keluar saat
+diuji), tapi endpoint jalan HARUS diverifikasi ulang setelah deploy ke
+Render, di mana server punya akses internet normal.
+

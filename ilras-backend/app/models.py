@@ -54,3 +54,18 @@ class AuditLog(Base):
     input_json = Column(Text, nullable=True)
     result_score = Column(Float, nullable=False)
     methodology_version = Column(String, nullable=False)
+
+
+class GisLayerCache(Base):
+    """
+    Caches external GIS API responses (e.g. Overpass road queries) so
+    we don't hit rate-limited third-party services on every request.
+    Not tied to the ILRI scoring engine -- purely a fetch cache.
+    """
+    __tablename__ = "gis_layer_cache"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    district_id = Column(String, nullable=False)
+    layer_type = Column(String, nullable=False)  # "roads"
+    geojson = Column(Text, nullable=False)
+    fetched_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

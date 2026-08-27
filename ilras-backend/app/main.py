@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import districts, simulate, analytics, methodology, recommendation
+from .routers import districts, simulate, analytics, methodology, recommendation, gis
 
 app = FastAPI(
     title="ILRAS API",
@@ -34,6 +34,7 @@ app.include_router(simulate.router)
 app.include_router(analytics.router)
 app.include_router(methodology.router)
 app.include_router(recommendation.router)
+app.include_router(gis.router)
 
 
 @app.get("/api/health")
