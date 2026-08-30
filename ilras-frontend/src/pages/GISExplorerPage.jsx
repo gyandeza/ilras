@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchDistricts, fetchRoadsLayer, fetchRiskLayer } from '../lib/dataService.js';
+import { fetchDistricts, fetchRoadsLayer, fetchRiskLayer, fetchBoundary } from '../lib/dataService.js';
 import { getBandColor } from '../lib/ilri.js';
 import DistrictMap from '../components/organisms/DistrictMap.jsx';
 import { useDistrictContext } from '../layout/DistrictContext.jsx';
@@ -10,10 +10,13 @@ export default function GISExplorerPage() {
   const [error, setError] = useState(null);
   const [showRoads, setShowRoads] = useState(false);
   const [showRisk, setShowRisk] = useState(false);
+  const [showBoundaries, setShowBoundaries] = useState(true);
   const [roadLayers, setRoadLayers] = useState([]);
   const [riskLayers, setRiskLayers] = useState([]);
+  const [boundaries, setBoundaries] = useState([]);
   const [roadsStatus, setRoadsStatus] = useState('idle'); // idle | loading | ready | error
   const [riskStatus, setRiskStatus] = useState('idle');
+  const [boundaryStatus, setBoundaryStatus] = useState('idle');
   const navigate = useNavigate();
   const { setActiveDistrict, setBreadcrumb } = useDistrictContext();
 
@@ -47,6 +50,23 @@ export default function GISExplorerPage() {
       .catch(() => setRiskStatus('error'));
   }, [showRisk, districts, riskLayers.length]);
 
+  useEffect(() => {
+    if (!showBoundaries || !districts || boundaries.length > 0) return;
+    setBoundaryStatus('loading');
+    // Real boundaries are opt-in per district: BIG may not have a match
+    // for every kecamatan, so failures here are individually swallowed
+    // (Promise.allSettled) rather than failing the whole layer -- a
+    // district missing from BIG still shows its marker as usual.
+    Promise.allSettled(districts.map((d) => fetchBoundary(d.id).then((res) => (res ? { districtId: d.id, feature: res.feature, band: d.band } : null))))
+      .then((results) => {
+        const found = results
+          .filter((r) => r.status === 'fulfilled' && r.value)
+          .map((r) => r.value);
+        setBoundaries(found);
+        setBoundaryStatus(found.length > 0 ? 'ready' : 'error');
+      });
+  }, [showBoundaries, districts, boundaries.length]);
+
   if (error) {
     return (
       <p className="page-sub" style={{ color: 'var(--band-belum-siap)' }}>
@@ -73,6 +93,7 @@ export default function GISExplorerPage() {
             height={520}
             roadLayers={showRoads ? roadLayers : []}
             riskLayers={showRisk ? riskLayers : []}
+            boundaries={showBoundaries ? boundaries : []}
           />
         </div>
         <div className="panel gis-layout__legend">
@@ -86,6 +107,11 @@ export default function GISExplorerPage() {
           ))}
 
           <div className="panel__heading" style={{ marginTop: 18 }}>Lapisan Tematik</div>
+          <label className="gis-layer-toggle">
+            <input type="checkbox" checked={showBoundaries} onChange={(e) => setShowBoundaries(e.target.checked)} />
+            Batas Kecamatan (BIG) {boundaryStatus === 'loading' && showBoundaries && <span className="gis-layer-toggle__status">memuat...</span>}
+            {boundaryStatus === 'error' && <span className="gis-layer-toggle__status gis-layer-toggle__status--error">tidak ditemukan</span>}
+          </label>
           <label className="gis-layer-toggle">
             <input type="checkbox" checked={showRoads} onChange={(e) => setShowRoads(e.target.checked)} />
             Jalan Utama {roadsStatus === 'loading' && showRoads && <span className="gis-layer-toggle__status">memuat...</span>}
@@ -104,7 +130,8 @@ export default function GISExplorerPage() {
           <div className="gis-layout__note">
             Kawasan Industri belum tersedia — data ada di portal Disperindag
             Riau (sepat.riau.go.id/mapki) namun belum memiliki API publik.
-            Jalan bersumber dari OpenStreetMap; Zona Risiko dari InaRisk BNPB.
+            Batas kecamatan dari BIG (edisi 2022); Jalan dari OpenStreetMap;
+            Zona Risiko dari InaRisk BNPB.
           </div>
         </div>
       </div>

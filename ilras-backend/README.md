@@ -146,3 +146,57 @@ bekerja (hanya konstruksi URL, tidak perlu jaringan keluar saat
 diuji), tapi endpoint jalan HARUS diverifikasi ulang setelah deploy ke
 Render, di mana server punya akses internet normal.
 
+## Essential Feature #1 — Batas Administratif Riil (pasca Change Request GIS)
+
+Endpoint baru: `GET /districts/{id}/boundary`, menarik poligon batas
+kecamatan RIIL dari BIG (Badan Informasi Geospasial), bukan lagi
+titik pusat + kotak perkiraan.
+
+**Verifikasi yang sudah dilakukan (level skema, bukan eksekusi live):**
+- Endpoint dikonfirmasi: `Administrasi_AR_Kecamatan_10K/MapServer/0`
+  ("data batas wilayah administrasi kecamatan edisi tahun 2022" --
+  deskripsi resmi dari layanan BIG sendiri)
+- Field `WADMKC`/`WADMKK`/`WADMPR` dikonfirmasi ADA di layer ini
+  secara langsung (bukan diasumsikan dari layanan sejenis)
+- Geometry type: esriGeometryPolygon, Spatial Reference: 4326 (WGS84)
+  -- selaras langsung dengan lat/lng yang sudah dipakai di seluruh
+  sistem, tidak perlu reproyeksi
+- Mendukung SQL expression (WHERE clause) dan output geoJSON langsung
+
+**BELUM diverifikasi (perlu dicek setelah deploy):** hasil query
+sesungguhnya. Sandbox pengembangan tidak bisa menjangkau
+`geoservices.big.go.id` (403 dari proxy jaringan sandbox, sama seperti
+Overpass dan InaRisk). Kalau setelah deploy hasil query kosong,
+kemungkinan penyebab: penulisan nama kecamatan/kabupaten di BIG tidak
+persis sama dengan yang ada di `seed.py` (mis. "Kec. Tapung" vs
+"Tapung") -- bukan endpoint yang salah.
+
+**Desain fallback:** kalau BIG tidak punya data untuk kecamatan
+tertentu, endpoint mengembalikan 404 dengan pesan jelas -- frontend
+otomatis kembali ke representasi titik+kotak perkiraan yang sudah ada,
+tidak pernah menyembunyikan kecamatan begitu saja.
+
+
+## Essential Feature #3 — Registry Sumber Data & Hyperlink (pasca Change Request Boundary)
+
+Model `DataSource` baru menggantikan field datar `source`/`updated`/
+`confidence` di `Indicator` dengan struktur registry riil:
+`agency, document_name, document_url (nullable), contact_phone,
+contact_email, last_verified_at`.
+
+**Prinsip kejujuran yang dipegang saat seed data:**
+- `document_url` HANYA diisi kalau URL spesifik yang riil ditemukan
+  lewat riset -- bukan homepage generik dinas. Contoh: BPS Kabupaten
+  Kampar (`kamparkab.bps.go.id`) dan dataset spesifik Kementerian PUPR
+  (`data.pu.go.id/dataset/kapasitas-dan-layanan-pdam`), keduanya
+  dikonfirmasi nyata lewat pencarian, bukan dikarang.
+- Kontak (`contact_phone`/`contact_email`) HANYA diisi kalau ditemukan
+  eksplisit di sumber (BPS Kampar punya nomor telepon dan email publik
+  yang dikonfirmasi; PUPR tidak, jadi dibiarkan `null`, bukan diisi
+  placeholder).
+
+**Confidence badge sekarang otomatis** (`DataSource.confidence`,
+computed property, bukan kolom manual): <6 bulan sejak
+`last_verified_at` = tinggi, 6-12 bulan = sedang, >12 bulan = rendah.
+Ini menutup Roadmap #4 (badge kepercayaan diperluas & otomatis)
+sekaligus, karena keduanya saling terkait langsung.

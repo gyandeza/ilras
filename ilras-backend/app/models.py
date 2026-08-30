@@ -29,15 +29,52 @@ class DimensionScore(Base):
     district = relationship("District", back_populates="dimension_scores")
 
 
+class DataSource(Base):
+    """
+    Registry of primary government data sources (Essential Feature #3,
+    Change Request). Every indicator must trace back to a real,
+    identifiable source -- never a fabricated hyperlink. `document_url`
+    is deliberately nullable: if no specific, verifiable document URL
+    exists, leave it null and show "dokumen belum tersedia daring"
+    rather than link to a generic agency homepage.
+    """
+    __tablename__ = "data_sources"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    agency = Column(String, nullable=False)  # e.g. "BPS Kabupaten Kampar"
+    document_name = Column(String, nullable=False)  # e.g. "Statistik Potensi Desa (Podes)"
+    document_url = Column(String, nullable=True)  # only set if a real, specific URL was verified
+    source_type = Column(String, nullable=False)  # "api" | "static" | "manual"
+    contact_phone = Column(String, nullable=True)
+    contact_email = Column(String, nullable=True)
+    last_verified_at = Column(DateTime, nullable=False)  # drives auto-computed confidence, not manually set per-indicator
+
+    indicators = relationship("Indicator", back_populates="source")
+
+    @property
+    def confidence(self) -> str:
+        """
+        Auto-computed from data age, per Roadmap #4 -- not a manually
+        set flag that can silently go stale. <6 months = high,
+        6-12 = medium, >12 months = low.
+        """
+        age_days = (datetime.now(timezone.utc) - self.last_verified_at.replace(tzinfo=timezone.utc)).days
+        if age_days < 182:
+            return "high"
+        if age_days < 365:
+            return "medium"
+        return "low"
+
+
 class Indicator(Base):
     __tablename__ = "indicators"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     dimension_key = Column(String, nullable=False)
     title = Column(String, nullable=False)
-    source = Column(String, nullable=False)
-    updated = Column(String, nullable=False)
-    confidence = Column(String, nullable=False)  # high | medium | low
+    source_id = Column(Integer, ForeignKey("data_sources.id"), nullable=False)
+
+    source = relationship("DataSource", back_populates="indicators")
 
 
 class AuditLog(Base):

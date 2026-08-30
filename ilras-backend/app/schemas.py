@@ -15,11 +15,23 @@ class DistrictOut(BaseModel):
     geo_precision: str = "approximate"
 
 
+class DataSourceOut(BaseModel):
+    agency: str
+    document_name: str
+    document_url: str | None = None
+    source_type: str
+    contact_phone: str | None = None
+    contact_email: str | None = None
+    last_verified_at: object  # datetime, serialized by pydantic automatically
+    confidence: str  # computed property on the ORM model, not a stored field
+
+    class Config:
+        from_attributes = True
+
+
 class IndicatorOut(BaseModel):
     title: str
-    source: str
-    updated: str
-    confidence: str
+    source: DataSourceOut
 
     class Config:
         from_attributes = True

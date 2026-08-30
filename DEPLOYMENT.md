@@ -122,3 +122,13 @@ built them (network egress restricted there) -- after deploying,
 open the Peta page and toggle both on to confirm they actually load
 on Render's real network. The rest of the app (dashboard, simulation,
 comparison, etc.) was fully verified and doesn't depend on this.
+
+**Also verify "Batas Kecamatan (BIG)" after deploy.** Same sandbox
+network limitation applies to the real administrative boundary
+polygons from BIG (`geoservices.big.go.id`). Schema-level verification
+was thorough (exact field names confirmed directly from the service's
+own layer definition), but the actual query response was never
+executed. If the toggle shows "tidak ditemukan" after deploy, check
+whether the kecamatan/kabupaten name strings in `seed.py` match BIG's
+exact spelling -- that's the most likely failure mode, not a broken
+endpoint.

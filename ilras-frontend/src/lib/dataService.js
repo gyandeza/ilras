@@ -77,3 +77,9 @@ export async function fetchRiskLayer(districtId) {
   const res = await fetch(`${API_BASE}/api/districts/${districtId}/layers/risk`);
   return handleResponse(res);
 }
+
+export async function fetchBoundary(districtId) {
+  const res = await fetch(`${API_BASE}/api/districts/${districtId}/boundary`);
+  if (res.status === 404) return null; // no boundary found -- fall back to marker, don't error the whole page
+  return handleResponse(res);
+}

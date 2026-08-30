@@ -2,8 +2,9 @@
 Seed the SQLite database with the same dummy pilot data used across
 every prior sprint deliverable (Sprint 0-4), for continuity.
 """
+from datetime import datetime, timezone
 from .database import Base, engine, SessionLocal
-from .models import District, DimensionScore, Indicator
+from .models import District, DimensionScore, Indicator, DataSource
 
 DISTRICTS = {
     "tapung": {
@@ -23,9 +24,34 @@ DISTRICTS = {
     },
 }
 
+# Real, verified sources -- no fabricated URLs or contact details.
+# document_url is only set where a specific page was confirmed to
+# exist (not a generic homepage); contact fields are only set where
+# a specific phone/email was found in the source itself.
+DATA_SOURCES = [
+    {
+        "agency": "BPS Kabupaten Kampar",
+        "document_name": "Statistik Potensi Desa (Podes)",
+        "document_url": "https://kamparkab.bps.go.id/id/publication.html",
+        "source_type": "static",
+        "contact_phone": "(0762) 20046",
+        "contact_email": "bps1406@bps.go.id",
+        "last_verified_at": datetime(2026, 6, 1, tzinfo=timezone.utc),
+    },
+    {
+        "agency": "Kementerian PUPR \u2014 Satu Data PU",
+        "document_name": "Kapasitas dan Layanan PDAM",
+        "document_url": "https://data.pu.go.id/dataset/kapasitas-dan-layanan-pdam",
+        "source_type": "api",
+        "contact_phone": None,
+        "contact_email": None,
+        "last_verified_at": datetime(2026, 3, 1, tzinfo=timezone.utc),
+    },
+]
+
 INDICATORS = [
-    {"dimension_key": "infrastructure", "title": "Rasio Elektrifikasi Desa", "source": "BPS Podes", "updated": "Jun 2026", "confidence": "high"},
-    {"dimension_key": "infrastructure", "title": "Cakupan Air Bersih", "source": "Data PUPR (proksi kabupaten)", "updated": "Mar 2026", "confidence": "medium"},
+    {"dimension_key": "infrastructure", "title": "Rasio Elektrifikasi Desa", "source_index": 0},
+    {"dimension_key": "infrastructure", "title": "Cakupan Air Bersih", "source_index": 1},
 ]
 
 
@@ -41,10 +67,20 @@ def seed():
             ))
             for dim_key, score in data["dims"].items():
                 db.add(DimensionScore(district_id=district_id, dimension_key=dim_key, score=score))
+
+        sources = [DataSource(**s) for s in DATA_SOURCES]
+        db.add_all(sources)
+        db.flush()  # assign IDs before referencing them below
+
         for ind in INDICATORS:
-            db.add(Indicator(**ind))
+            db.add(Indicator(
+                dimension_key=ind["dimension_key"],
+                title=ind["title"],
+                source_id=sources[ind["source_index"]].id,
+            ))
+
         db.commit()
-        print(f"Seeded {len(DISTRICTS)} districts, {len(INDICATORS)} indicators.")
+        print(f"Seeded {len(DISTRICTS)} districts, {len(sources)} data sources, {len(INDICATORS)} indicators.")
     finally:
         db.close()
 

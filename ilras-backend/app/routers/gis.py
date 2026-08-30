@@ -12,6 +12,7 @@ from .. import gis_layers
 router = APIRouter(prefix="/api/districts", tags=["gis-layers"])
 
 CACHE_TTL = timedelta(days=7)  # road networks don't change often; avoid hammering Overpass
+BOUNDARY_CACHE_TTL = timedelta(days=90)  # administrative boundaries change extremely rarely
 
 
 @router.get("/{district_id}/layers/roads")
@@ -56,3 +57,45 @@ def get_risk_layer(district_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=422, detail="Kecamatan ini tidak memiliki data lokasi")
 
     return gis_layers.build_risk_overlay(district.lat, district.lng)
+
+
+@router.get("/{district_id}/boundary")
+async def get_boundary(district_id: str, db: Session = Depends(get_db)):
+    """
+    Real administrative boundary polygon from BIG, replacing the
+    approximate centroid+bbox representation used elsewhere. Falls
+    back to a clear "unavailable" response (not a fabricated polygon)
+    if BIG has no matching record or is unreachable -- the frontend
+    should keep using the marker+bbox approach in that case, not hide
+    the district entirely.
+    """
+    district = db.get(District, district_id)
+    if not district:
+        raise HTTPException(status_code=404, detail=f'Kecamatan "{district_id}" tidak ditemukan')
+
+    cached = (
+        db.query(GisLayerCache)
+        .filter(GisLayerCache.district_id == district_id, GisLayerCache.layer_type == "boundary")
+        .order_by(GisLayerCache.fetched_at.desc())
+        .first()
+    )
+    if cached and datetime.now(timezone.utc) - cached.fetched_at.replace(tzinfo=timezone.utc) < BOUNDARY_CACHE_TTL:
+        return {"feature": json.loads(cached.geojson), "cached": True, "fetched_at": cached.fetched_at}
+
+    try:
+        feature = await gis_layers.fetch_kecamatan_boundary(district.name, district.kabupaten)
+    except (httpx.HTTPError, httpx.TimeoutException) as e:
+        if cached:
+            return {"feature": json.loads(cached.geojson), "cached": True, "stale": True, "fetched_at": cached.fetched_at}
+        raise HTTPException(status_code=502, detail=f"Gagal mengambil batas wilayah dari BIG: {e}")
+
+    if feature is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f'Batas wilayah "{district.name}, {district.kabupaten}" tidak ditemukan di layanan BIG',
+        )
+
+    db.add(GisLayerCache(district_id=district_id, layer_type="boundary", geojson=json.dumps(feature)))
+    db.commit()
+
+    return {"feature": feature, "cached": False, "fetched_at": datetime.now(timezone.utc)}

@@ -117,3 +117,51 @@ def build_risk_overlay(lat: float, lng: float) -> dict:
         "source": "InaRisk BNPB \u2014 Indeks Bahaya Banjir",
         "disclaimer": INARISK_DISCLAIMER,
     }
+
+
+# --- Essential Feature #1 (Change Request): real administrative boundaries ---
+#
+# BIG (Badan Informasi Geospasial) publishes an official kecamatan-level
+# polygon boundary service. VERIFIED directly against this exact layer's
+# own field schema (not inferred from a sibling service): geometry type
+# esriGeometryPolygon, spatial reference 4326 (WGS84 -- no reprojection
+# needed), fields WADMKC/WADMKK/WADMPR confirmed present, SQL expressions
+# and geoJSON output format both confirmed supported.
+#
+# Service: "Data batas wilayah administrasi kecamatan edisi tahun 2022,
+# bersumber dari data batas wilayah administrasi desa/kelurahan edisi
+# 2022 yang disatukan." -- BIG's own service description.
+#
+# NOT yet runtime-verified: the actual query response (sandbox network
+# restriction prevents executing the live HTTP call, same limitation as
+# every other external call in this project). Schema-level verification
+# is strong, but confirm the first real query after deploying.
+BIG_KECAMATAN_SERVICE = (
+    "https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/"
+    "Administrasi_AR_Kecamatan_10K/MapServer/0/query"
+)
+
+
+async def fetch_kecamatan_boundary(name: str, kabupaten: str) -> dict | None:
+    """
+    Queries BIG for the real administrative boundary polygon of a
+    kecamatan. Returns a GeoJSON Feature, or None if no match was
+    found (caller should fall back to the approximate centroid+bbox
+    representation already used elsewhere in the GIS module -- never
+    silently show nothing where a boundary was expected).
+    """
+    where_clause = f"UPPER(WADMKC)=UPPER('{name}') AND UPPER(WADMKK) LIKE UPPER('%{kabupaten}%')"
+    params = {
+        "where": where_clause,
+        "outFields": "WADMKC,WADMKK,WADMPR",
+        "f": "geojson",
+    }
+    async with httpx.AsyncClient(timeout=20) as client:
+        resp = await client.get(BIG_KECAMATAN_SERVICE, params=params)
+        resp.raise_for_status()
+        data = resp.json()
+
+    features = data.get("features", [])
+    if not features:
+        return None
+    return features[0]

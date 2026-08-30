@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchDistrict, fetchIndicators, fetchRecommendation } from '../lib/dataService.js';
+import { fetchDistrict, fetchIndicators, fetchRecommendation, fetchBoundary } from '../lib/dataService.js';
 import { getBandColor, getLowestDimension, DIMENSIONS } from '../lib/ilri.js';
 import ScoreRing from '../components/atoms/ScoreRing.jsx';
 import BandPill from '../components/atoms/BandPill.jsx';
@@ -17,6 +17,7 @@ export default function DistrictDetailPage() {
   const [district, setDistrict] = useState(null);
   const [indicators, setIndicators] = useState([]);
   const [recommendation, setRecommendation] = useState(null);
+  const [boundary, setBoundary] = useState(null);
   const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'not-found' | 'error'
   const [error, setError] = useState(null);
   const { setActiveDistrict, setBreadcrumb } = useDistrictContext();
@@ -44,6 +45,7 @@ export default function DistrictDetailPage() {
       });
     fetchIndicators('infrastructure', id).then(setIndicators).catch(() => setIndicators([]));
     fetchRecommendation(id).then(setRecommendation).catch(() => setRecommendation(null));
+    fetchBoundary(id).then(setBoundary).catch(() => setBoundary(null));
   }, [id, setActiveDistrict, setBreadcrumb]);
 
   if (status === 'loading') return <p className="page-sub">Memuat data...</p>;
@@ -85,7 +87,12 @@ export default function DistrictDetailPage() {
             <BandPill band={band} />
           </div>
           <div className="detail-grid__map">
-            <DistrictMap districts={[district]} zoom={12} height={180} />
+            <DistrictMap
+              districts={[district]}
+              zoom={12}
+              height={180}
+              boundaries={boundary ? [{ districtId: district.id, feature: boundary.feature, band: district.band }] : []}
+            />
           </div>
           <div className="detail-grid__actions">
             <Button variant="primary" onClick={() => navigate(`/simulate/${district.id}`)}>

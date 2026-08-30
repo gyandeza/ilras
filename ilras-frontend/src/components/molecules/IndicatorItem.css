@@ -31,3 +31,32 @@
   background: #fbf0dc;
   color: var(--band-cukup-siap);
 }
+.indicator-item__conf--low {
+  background: #fdecea;
+  color: var(--band-belum-siap);
+}
+.indicator-item__links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.indicator-item__link {
+  font-size: var(--text-xs);
+  color: var(--color-primary-600);
+  font-weight: 600;
+  text-decoration: none;
+}
+.indicator-item__link:hover {
+  text-decoration: underline;
+}
+.indicator-item__link--unavailable {
+  color: var(--color-muted);
+  font-weight: 400;
+  font-style: italic;
+}
+.indicator-item__contact {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}

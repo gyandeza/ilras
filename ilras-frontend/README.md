@@ -118,3 +118,25 @@ src/
 - The risk layer overlay MUST keep showing the BNPB disclaimer text
   whenever it's active -- this is a compliance requirement from
   BNPB's own terms of use, not an optional UI detail.
+
+## Essential Feature #1 notes (Batas Administratif Riil)
+
+- "Batas Kecamatan (BIG)" toggle on Peta page, default ON.
+- District Detail automatically tries to load the real boundary and
+  falls back to the marker+bbox representation silently if BIG has no
+  match -- no error shown to the user for this specific case, since a
+  missing boundary for one kecamatan is an expected, non-fatal state,
+  not a system failure.
+- `DistrictMap`'s "approximate location" disclaimer is now per-district
+  aware: a district WITH a loaded real boundary no longer shows that
+  disclaimer, even if other districts on the same map still do.
+
+## Essential Feature #3 notes (Registry Sumber Data)
+
+- `IndicatorItem` now renders a real clickable hyperlink to the source
+  document when `document_url` is set, or an honest "Dokumen belum
+  tersedia daring" message when it's null -- never a fake link.
+- Contact info (phone/email) only shown when the backend actually has
+  it; no placeholder text when it's missing.
+- Confidence badge is fully backend-computed now (from `last_verified_at`
+  age) -- the frontend just displays whatever `source.confidence` says.

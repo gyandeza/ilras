@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline, ImageOverlay, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, ImageOverlay, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useEffect } from 'react';
 import { getBandColor } from '../../lib/ilri.js';
@@ -41,8 +41,14 @@ function FitBounds({ districts }) {
  * @param {number} zoom - initial zoom when only one district present
  * @param {Array} roadLayers - optional, array of {districtId, geojson} for road overlays
  * @param {Array} riskLayers - optional, array of {districtId, image_url, bounds, disclaimer} for risk overlays
+ * @param {Array} boundaries - optional, array of {districtId, feature, band} for real BIG boundary polygons.
+ *   Districts WITHOUT a matching boundary here automatically keep showing
+ *   their marker instead -- never silently hide a district.
  */
-export default function DistrictMap({ districts, onMarkerClick, zoom = 11, height = 260, roadLayers = [], riskLayers = [] }) {
+export default function DistrictMap({
+  districts, onMarkerClick, zoom = 11, height = 260,
+  roadLayers = [], riskLayers = [], boundaries = [],
+}) {
   const valid = districts.filter((d) => d.lat != null && d.lng != null);
   if (valid.length === 0) {
     return (
@@ -53,7 +59,12 @@ export default function DistrictMap({ districts, onMarkerClick, zoom = 11, heigh
   }
 
   const center = [valid[0].lat, valid[0].lng];
-  const hasApproximate = valid.some((d) => d.geo_precision !== 'surveyed');
+  const boundaryIds = new Set(boundaries.map((b) => b.districtId));
+  // A district only gets the "approximate" caveat if it has NO real
+  // boundary polygon -- once BIG's boundary is loaded for a district,
+  // that specific one is surveyed, even if others in the same view
+  // still fall back to the marker representation.
+  const hasApproximate = valid.some((d) => d.geo_precision !== 'surveyed' && !boundaryIds.has(d.id));
   const riskDisclaimer = riskLayers.find((r) => r.disclaimer)?.disclaimer;
 
   return (
@@ -71,6 +82,14 @@ export default function DistrictMap({ districts, onMarkerClick, zoom = 11, heigh
 
         {riskLayers.map((r) => (
           <ImageOverlay key={`risk-${r.districtId}`} url={r.image_url} bounds={r.bounds} opacity={0.55} />
+        ))}
+
+        {boundaries.map((b) => (
+          <GeoJSON
+            key={`boundary-${b.districtId}`}
+            data={b.feature}
+            style={{ color: getBandColor(b.band), weight: 2.5, fillOpacity: 0.12 }}
+          />
         ))}
 
         {roadLayers.map((layer) =>
@@ -107,6 +126,11 @@ export default function DistrictMap({ districts, onMarkerClick, zoom = 11, heigh
       {hasApproximate && (
         <div className="district-map__disclaimer">
           Lokasi bersifat perkiraan (titik pusat), bukan batas administratif hasil survei.
+        </div>
+      )}
+      {boundaries.length > 0 && (
+        <div className="district-map__disclaimer">
+          Batas wilayah: Badan Informasi Geospasial (BIG), edisi 2022.
         </div>
       )}
       {riskDisclaimer && (
