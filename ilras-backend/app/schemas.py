@@ -136,3 +136,12 @@ class RecommendationOut(BaseModel):
     swot: SwotOut
     investment: InvestmentTierOut
     methodology_version: str
+
+
+class HistoryEntryOut(BaseModel):
+    timestamp: object  # datetime
+    action: str  # "score_view" | "simulate"
+    action_label: str  # human-readable Indonesian label
+    result_score: float
+    methodology_version: str
+    methodology_changed: bool  # True if this entry's methodology_version differs from the immediately preceding entry

@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from ..database import get_db
 from ..models import District, DimensionScore, Indicator, AuditLog
-from ..schemas import DistrictOut, IndicatorOut
+from ..schemas import DistrictOut, IndicatorOut, HistoryEntryOut
 from .. import ilri
 
 router = APIRouter(prefix="/api/districts", tags=["districts"])
@@ -66,3 +66,46 @@ def get_indicators(district_id: str, dimension: str, db: Session = Depends(get_d
         select(Indicator).where(Indicator.dimension_key == dimension)
     ).scalars().all()
     return indicators
+
+
+ACTION_LABELS = {
+    "score_view": "Skor dilihat",
+    "simulate": "Simulasi skenario dijalankan",
+}
+
+
+@router.get("/{district_id}/history", response_model=list[HistoryEntryOut])
+def get_history(district_id: str, limit: int = 20, db: Session = Depends(get_db)):
+    """
+    Surfaces audit_log as a readable timeline (Essential Feature:
+    Timeline Perubahan). Deliberately does NOT invent narrative text
+    beyond what's actually recorded -- the one enrichment added is
+    flagging methodology_version transitions, since that's a genuinely
+    meaningful event (e.g. the Sprint 8 equal-weighting switch) that
+    would otherwise be invisible in a flat log.
+    """
+    district = db.get(District, district_id)
+    if not district:
+        raise HTTPException(status_code=404, detail=f'Kecamatan "{district_id}" tidak ditemukan')
+
+    logs = db.execute(
+        select(AuditLog)
+        .where(AuditLog.district_id == district_id)
+        .order_by(AuditLog.timestamp.desc())
+        .limit(limit)
+    ).scalars().all()
+
+    entries = []
+    for i, log in enumerate(logs):
+        # logs are newest-first; the "previous" entry chronologically is the NEXT one in this list
+        older = logs[i + 1] if i + 1 < len(logs) else None
+        methodology_changed = older is not None and older.methodology_version != log.methodology_version
+        entries.append(HistoryEntryOut(
+            timestamp=log.timestamp,
+            action=log.action,
+            action_label=ACTION_LABELS.get(log.action, log.action),
+            result_score=log.result_score,
+            methodology_version=log.methodology_version,
+            methodology_changed=methodology_changed,
+        ))
+    return entries

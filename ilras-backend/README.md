@@ -200,3 +200,18 @@ computed property, bukan kolom manual): <6 bulan sejak
 `last_verified_at` = tinggi, 6-12 bulan = sedang, >12 bulan = rendah.
 Ini menutup Roadmap #4 (badge kepercayaan diperluas & otomatis)
 sekaligus, karena keduanya saling terkait langsung.
+
+## Roadmap #1, #2, #3 — Timeline, Ekspor PDF, Ringkasan Eksekutif (pasca Essential #3)
+
+`GET /districts/{id}/history` menyurfacekan `audit_log` sebagai timeline
+terbaca -- dibatasi 20 entri terbaru, dengan label bahasa Indonesia.
+Satu enrichment ditambahkan (bukan sekadar tampilan mentah): setiap
+entri menandai `methodology_changed` kalau `methodology_version`-nya
+berbeda dari entri sebelumnya secara kronologis -- ini menangkap momen
+seperti perubahan bobot setara di Sprint 8 secara otomatis, tanpa perlu
+tabel/logika terpisah untuk mencatat perubahan metodologi secara eksplisit.
+
+Ekspor PDF dan Ringkasan Eksekutif keduanya diimplementasikan di
+frontend (client-side, lihat README frontend) -- tidak perlu perubahan
+backend tambahan karena semua data yang dibutuhkan sudah tersedia dari
+endpoint yang ada (`/districts/{id}` dan `/districts/{id}/recommendation`).

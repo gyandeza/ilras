@@ -140,3 +140,23 @@ src/
   it; no placeholder text when it's missing.
 - Confidence badge is fully backend-computed now (from `last_verified_at`
   age) -- the frontend just displays whatever `source.confidence` says.
+
+## Roadmap #1, #2, #3 notes (Timeline, Ekspor PDF, Ringkasan Eksekutif)
+
+- `HistoryTimeline` organism displays `/districts/{id}/history`, with a
+  visible warning badge when `methodology_changed` is true for an entry.
+- `lib/reportText.js` generates the executive summary paragraph --
+  template-based, reused identically in both the on-page panel and the
+  PDF export (single source of text, not duplicated logic).
+- `lib/pdfExport.js` uses `jspdf` (client-side, no new backend
+  dependency) to generate a one-page district profile PDF. This
+  pulled in `html2canvas` as a transitive dependency even though it's
+  unused (jsPDF's `.html()` method isn't called here) -- adds ~200KB
+  to the bundle. Worth investigating a lighter jsPDF import path in a
+  future CR if bundle size becomes a real concern; not fixed here to
+  keep this CR scoped to functionality, not bundle optimization.
+- Clipboard copy (`ExecutiveSummaryPanel`) requires clipboard-write
+  permission in the browser -- this failed in automated headless
+  testing without explicit permission grants, which is a testing
+  environment quirk, not an app bug (verified working correctly once
+  permissions were granted in the test).

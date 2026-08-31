@@ -83,3 +83,8 @@ export async function fetchBoundary(districtId) {
   if (res.status === 404) return null; // no boundary found -- fall back to marker, don't error the whole page
   return handleResponse(res);
 }
+
+export async function fetchHistory(districtId) {
+  const res = await fetch(`${API_BASE}/api/districts/${districtId}/history`);
+  return handleResponse(res);
+}

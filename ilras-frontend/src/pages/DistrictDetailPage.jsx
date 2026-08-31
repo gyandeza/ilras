@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchDistrict, fetchIndicators, fetchRecommendation, fetchBoundary } from '../lib/dataService.js';
+import { fetchDistrict, fetchIndicators, fetchRecommendation, fetchBoundary, fetchHistory } from '../lib/dataService.js';
 import { getBandColor, getLowestDimension, DIMENSIONS } from '../lib/ilri.js';
+import { exportDistrictProfilePdf } from '../lib/pdfExport.js';
 import ScoreRing from '../components/atoms/ScoreRing.jsx';
 import BandPill from '../components/atoms/BandPill.jsx';
 import Button from '../components/atoms/Button.jsx';
@@ -9,6 +10,8 @@ import DimensionBar from '../components/molecules/DimensionBar.jsx';
 import IndicatorItem from '../components/molecules/IndicatorItem.jsx';
 import DistrictMap from '../components/organisms/DistrictMap.jsx';
 import RecommendationPanel from '../components/organisms/RecommendationPanel.jsx';
+import HistoryTimeline from '../components/organisms/HistoryTimeline.jsx';
+import ExecutiveSummaryPanel from '../components/organisms/ExecutiveSummaryPanel.jsx';
 import { useDistrictContext } from '../layout/DistrictContext.jsx';
 
 export default function DistrictDetailPage() {
@@ -18,6 +21,7 @@ export default function DistrictDetailPage() {
   const [indicators, setIndicators] = useState([]);
   const [recommendation, setRecommendation] = useState(null);
   const [boundary, setBoundary] = useState(null);
+  const [history, setHistory] = useState([]);
   const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'not-found' | 'error'
   const [error, setError] = useState(null);
   const { setActiveDistrict, setBreadcrumb } = useDistrictContext();
@@ -46,6 +50,7 @@ export default function DistrictDetailPage() {
     fetchIndicators('infrastructure', id).then(setIndicators).catch(() => setIndicators([]));
     fetchRecommendation(id).then(setRecommendation).catch(() => setRecommendation(null));
     fetchBoundary(id).then(setBoundary).catch(() => setBoundary(null));
+    fetchHistory(id).then(setHistory).catch(() => setHistory([]));
   }, [id, setActiveDistrict, setBreadcrumb]);
 
   if (status === 'loading') return <p className="page-sub">Memuat data...</p>;
@@ -100,8 +105,13 @@ export default function DistrictDetailPage() {
             </Button>
           </div>
           <div className="detail-grid__actions">
-            <Button variant="outline" disabled title="Belum tersedia di prototipe ini">
-              Unduh Laporan
+            <Button
+              variant="outline"
+              onClick={() => exportDistrictProfilePdf(district, recommendation)}
+              disabled={!recommendation}
+              title={!recommendation ? 'Menunggu data rekomendasi dimuat' : undefined}
+            >
+              📥 Unduh Laporan
             </Button>
           </div>
         </div>
@@ -125,6 +135,13 @@ export default function DistrictDetailPage() {
             ))}
           </div>
           <RecommendationPanel data={recommendation} />
+          <div style={{ marginTop: 18 }}>
+            <ExecutiveSummaryPanel district={district} recommendation={recommendation} />
+          </div>
+          <div className="panel" style={{ marginTop: 18 }}>
+            <div className="panel__heading">Riwayat Perubahan</div>
+            <HistoryTimeline entries={history} />
+          </div>
         </div>
       </div>
     </>

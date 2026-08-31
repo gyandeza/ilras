@@ -1,0 +1,6 @@
+.exec-summary__text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-ink);
+  margin-bottom: 14px;
+}
