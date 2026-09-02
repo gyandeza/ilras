@@ -244,3 +244,25 @@ risiko) -- bukan pilihan sembarangan. 5 dimensi lain (Aksesibilitas,
 Logistik, Potensi Industri, Sosial Ekonomi, dan Infrastruktur yang
 masih perlu 1 indikator lagi) masih menunggu riset sumber data di CR
 berikutnya, satu atau dua dimensi per CR sesuai rencana semula.
+
+## Essential #2 — Dimensi Sosial Ekonomi (pasca perbaikan Layer Jalan)
+
+2 indikator baru: "Kepadatan Penduduk" dan "Angkatan Kerja", keduanya
+bersumber dari **Kabupaten Kampar Dalam Angka 2025** -- publikasi
+tahunan resmi BPS Kabupaten Kampar (bukan Podes yang sudah dipakai
+untuk indikator Infrastruktur; ini publikasi berbeda yang memang
+memuat data demografi/ketenagakerjaan, dipilih karena isinya benar-benar
+sesuai, bukan sekadar sumber yang sudah ada).
+
+**Temuan jujur dari auto-confidence:** publikasi ini dirilis 28
+Februari 2025, yang berarti sudah lebih dari 12 bulan sejak
+`last_verified_at` -- badge kepercayaan otomatis menghitungnya sebagai
+"Keyakinan Rendah". Ini BUKAN bug -- ini sistem auto-confidence dari
+Essential #3 bekerja persis seperti dirancang, menangkap kenyataan
+bahwa publikasi tahunan BPS memang punya jeda rilis. Kalau publikasi
+2026 sudah terbit saat pembaca membaca ini, `last_verified_at` perlu
+diperbarui ke publikasi terbaru.
+
+**Dimensi tersisa untuk Essential #2:** Aksesibilitas, Logistik,
+Potensi Industri. Konektivitas dan Risiko sudah dari CR sebelumnya;
+Infrastruktur dan Sosial Ekonomi sudah dari CR ini.

@@ -65,6 +65,15 @@ DATA_SOURCES = [
         "contact_email": None,
         "last_verified_at": datetime(2026, 8, 21, tzinfo=timezone.utc),
     },
+    {
+        "agency": "BPS Kabupaten Kampar",
+        "document_name": "Kabupaten Kampar Dalam Angka 2025",
+        "document_url": "https://kamparkab.bps.go.id/en/publication/2025/02/28/c2398f34858c851e102a8ba0/kabupaten-kampar-dalam-angka-2025.html",
+        "source_type": "static",
+        "contact_phone": "(0762) 20046",
+        "contact_email": "bps1406@bps.go.id",
+        "last_verified_at": datetime(2025, 2, 28, tzinfo=timezone.utc),
+    },
 ]
 
 INDICATORS = [
@@ -72,6 +81,8 @@ INDICATORS = [
     {"dimension_key": "infrastructure", "title": "Cakupan Air Bersih", "source_index": 1},
     {"dimension_key": "connectivity", "title": "Kepadatan Jaringan Jalan Utama", "source_index": 2},
     {"dimension_key": "risk", "title": "Indeks Bahaya Banjir", "source_index": 3},
+    {"dimension_key": "socio", "title": "Kepadatan Penduduk", "source_index": 4},
+    {"dimension_key": "socio", "title": "Angkatan Kerja", "source_index": 4},
 ]
 
 
