@@ -74,6 +74,15 @@ DATA_SOURCES = [
         "contact_email": "bps1406@bps.go.id",
         "last_verified_at": datetime(2025, 2, 28, tzinfo=timezone.utc),
     },
+    {
+        "agency": "BPS Kabupaten Kampar",
+        "document_name": "Distribusi PDRB Menurut Lapangan Usaha (Industri Pengolahan)",
+        "document_url": "https://kamparkab.bps.go.id/en/statistics-table/3/T0UxS09GQlBTbk5QWTBNdlVWUmxSMjV3Y3l0VWR6MDkjMw==/distribusi-persentase-produk-domestik-regional-bruto-atas-dasar-harga-berlaku-menurut-lapangan-usaha-di-kabupaten-kampar--2011.html",
+        "source_type": "static",
+        "contact_phone": "(0762) 20046",
+        "contact_email": "bps1406@bps.go.id",
+        "last_verified_at": datetime(2025, 12, 1, tzinfo=timezone.utc),
+    },
 ]
 
 INDICATORS = [
@@ -83,6 +92,7 @@ INDICATORS = [
     {"dimension_key": "risk", "title": "Indeks Bahaya Banjir", "source_index": 3},
     {"dimension_key": "socio", "title": "Kepadatan Penduduk", "source_index": 4},
     {"dimension_key": "socio", "title": "Angkatan Kerja", "source_index": 4},
+    {"dimension_key": "industrial", "title": "Kontribusi Sektor Industri Pengolahan terhadap PDRB", "source_index": 5},
 ]
 
 

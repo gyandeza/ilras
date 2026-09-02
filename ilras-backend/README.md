@@ -266,3 +266,22 @@ diperbarui ke publikasi terbaru.
 **Dimensi tersisa untuk Essential #2:** Aksesibilitas, Logistik,
 Potensi Industri. Konektivitas dan Risiko sudah dari CR sebelumnya;
 Infrastruktur dan Sosial Ekonomi sudah dari CR ini.
+
+## Essential #2 — Dimensi Potensi Industri (pasca Sosial Ekonomi)
+
+1 indikator baru: "Kontribusi Sektor Industri Pengolahan terhadap
+PDRB" -- sumber tabel resmi BPS Kabupaten Kampar (Distribusi PDRB
+Menurut Lapangan Usaha), data 2025.
+
+**Batasan yang sengaja dijaga:** riset juga menemukan data jumlah unit
+usaha industri (Dinas Perindustrian Kampar, mis. "12 unit industri
+kecil") tapi HANYA lewat sumber sekunder (ensiklopedia daerah), bukan
+dokumen resmi Dinas Perindustrian secara langsung. Sesuai prinsip
+kejujuran yang dipegang sejak RT-01 dan CR Registry, indikator ini
+TIDAK ditambahkan sampai URL primer yang bisa diverifikasi langsung
+ditemukan -- lebih baik 1 indikator solid daripada 2 indikator dengan
+1 yang sumbernya lemah.
+
+**Progres Essential #2:** Infrastruktur (2), Konektivitas (1), Risiko
+(1), Sosial Ekonomi (2), Potensi Industri (1) -- total 5 dari 7
+dimensi. Tersisa: Aksesibilitas, Logistik.
