@@ -47,11 +47,31 @@ DATA_SOURCES = [
         "contact_email": None,
         "last_verified_at": datetime(2026, 3, 1, tzinfo=timezone.utc),
     },
+    {
+        "agency": "OpenStreetMap Contributors",
+        "document_name": "Data Jaringan Jalan (Overpass API)",
+        "document_url": "https://www.openstreetmap.org/copyright",
+        "source_type": "api",
+        "contact_phone": None,
+        "contact_email": None,
+        "last_verified_at": datetime(2026, 8, 21, tzinfo=timezone.utc),
+    },
+    {
+        "agency": "InaRisk BNPB",
+        "document_name": "Indeks Risiko Bencana Indonesia (IRBI) \u2014 Bahaya Banjir",
+        "document_url": "https://inarisk.bnpb.go.id/irbi",
+        "source_type": "api",
+        "contact_phone": None,
+        "contact_email": None,
+        "last_verified_at": datetime(2026, 8, 21, tzinfo=timezone.utc),
+    },
 ]
 
 INDICATORS = [
     {"dimension_key": "infrastructure", "title": "Rasio Elektrifikasi Desa", "source_index": 0},
     {"dimension_key": "infrastructure", "title": "Cakupan Air Bersih", "source_index": 1},
+    {"dimension_key": "connectivity", "title": "Kepadatan Jaringan Jalan Utama", "source_index": 2},
+    {"dimension_key": "risk", "title": "Indeks Bahaya Banjir", "source_index": 3},
 ]
 
 

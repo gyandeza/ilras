@@ -24,6 +24,14 @@ const ROAD_COLORS = {
   tertiary: '#5B6472',
 };
 
+export const ROAD_LEGEND = [
+  { key: 'motorway', label: 'Tol / Bebas Hambatan', color: ROAD_COLORS.motorway },
+  { key: 'trunk', label: 'Jalan Nasional', color: ROAD_COLORS.trunk },
+  { key: 'primary', label: 'Jalan Provinsi', color: ROAD_COLORS.primary },
+  { key: 'secondary', label: 'Jalan Kabupaten (Sekunder)', color: ROAD_COLORS.secondary },
+  { key: 'tertiary', label: 'Jalan Kabupaten (Tersier)', color: ROAD_COLORS.tertiary },
+];
+
 function FitBounds({ districts }) {
   const map = useMap();
   useEffect(() => {

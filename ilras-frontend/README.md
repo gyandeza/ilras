@@ -160,3 +160,18 @@ src/
   testing without explicit permission grants, which is a testing
   environment quirk, not an app bug (verified working correctly once
   permissions were granted in the test).
+
+## Perbaikan Layer Jalan + Essential #2 notes
+
+- `DistrictDetailPage` no longer hardcodes fetching only the
+  Infrastruktur dimension's indicators -- it now fetches all 7
+  dimensions in parallel (`Promise.allSettled`) and only renders a
+  section for dimensions that actually have indicators. This scales
+  naturally as more dimensions get real indicators in future CRs,
+  with no further page-level code changes needed.
+- `ROAD_LEGEND` exported from `DistrictMap.jsx`, used by
+  `GISExplorerPage` to show a road-hierarchy color legend
+  (Tol/Nasional/Provinsi/Kabupaten) once the roads layer successfully
+  loads -- untested visually in the sandbox since Overpass is blocked
+  there, but the conditional logic was code-reviewed and the color
+  values are the single source of truth shared with the map itself.

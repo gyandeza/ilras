@@ -17,6 +17,16 @@ internet access.
 import httpx
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+# overpass-api.de has documented reliability issues as of August 2026
+# (repeated connect timeouts, plus a stateful 406 rejection pattern
+# where the server blocks a client based on prior categorization --
+# retrying the SAME server does not help in that case). Kumi Systems
+# is a widely-recommended, well-resourced public mirror (4 servers,
+# 20 cores/256GB RAM each, no registration required) used as fallback.
+OVERPASS_FALLBACK_URLS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+]
 INARISK_BASE = "https://gis.bnpb.go.id/server/rest/services/inarisk"
 
 # Only major road classes -- residential/service roads would be too
@@ -46,7 +56,14 @@ async def fetch_osm_roads(lat: float, lng: float) -> dict:
     """
     Queries Overpass API for major roads within the district's
     approximate bounding box. Returns a GeoJSON FeatureCollection.
-    Raises httpx.HTTPError / httpx.TimeoutException on failure --
+
+    Tries each server in OVERPASS_FALLBACK_URLS in order -- the
+    primary (overpass-api.de) has had documented reliability issues
+    in 2026 (connect timeouts, and a stateful 406 rejection that does
+    NOT clear on retry to the same server), so a genuinely different
+    server is tried rather than just retrying the same one.
+
+    Raises the LAST error encountered if every server fails --
     callers should catch and degrade gracefully (empty layer + a
     clear "unavailable" state), not crash the whole district view.
     """
@@ -59,10 +76,21 @@ async def fetch_osm_roads(lat: float, lng: float) -> dict:
     );
     out geom;
     """
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.post(OVERPASS_URL, data={"data": query})
-        resp.raise_for_status()
-        data = resp.json()
+
+    last_error = None
+    for server_url in OVERPASS_FALLBACK_URLS:
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.post(server_url, data={"data": query})
+                resp.raise_for_status()
+                data = resp.json()
+            break  # success -- stop trying further mirrors
+        except (httpx.HTTPError, httpx.TimeoutException) as e:
+            last_error = e
+            continue
+    else:
+        # every mirror failed
+        raise last_error
 
     features = []
     for element in data.get("elements", []):

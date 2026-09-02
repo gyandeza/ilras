@@ -215,3 +215,32 @@ Ekspor PDF dan Ringkasan Eksekutif keduanya diimplementasikan di
 frontend (client-side, lihat README frontend) -- tidak perlu perubahan
 backend tambahan karena semua data yang dibutuhkan sudah tersedia dari
 endpoint yang ada (`/districts/{id}` dan `/districts/{id}/recommendation`).
+
+## Perbaikan Layer Jalan + Essential #2 (pasca Roadmap #1-3)
+
+**Perbaikan robustness layer Jalan:** riset menemukan `overpass-api.de`
+punya insiden reliabilitas terdokumentasi di Agustus 2026 (timeout
+koneksi berulang, DAN pola penolakan 406 yang bersifat *stateful* --
+retry ke server yang SAMA tidak membantu kalau klien sudah
+dikategorikan). `fetch_osm_roads()` sekarang mencoba
+`overpass-api.de` lalu failover ke `overpass.kumi.systems` (mirror
+publik dengan sumber daya kuat, tidak perlu registrasi) sebelum
+menyerah. Diverifikasi di sandbox: error yang muncul berasal dari
+mirror KEDUA, mengonfirmasi keduanya benar-benar dicoba.
+
+**Essential Feature #2 (dimulai, bukan selesai):** 2 dimensi baru
+mendapat indikator riil dengan sumber terverifikasi:
+- Konektivitas: "Kepadatan Jaringan Jalan Utama" -- sumber OpenStreetMap
+  Contributors, link ke `openstreetmap.org/copyright` (halaman atribusi
+  resmi OSM, bukan homepage generik)
+- Risiko: "Indeks Bahaya Banjir" -- sumber InaRisk BNPB, link ke
+  `inarisk.bnpb.go.id/irbi` (dashboard IRBI resmi, dikonfirmasi lewat
+  pencarian, bukan endpoint API mentah yang sudah dipakai untuk overlay
+  peta)
+
+Kedua dimensi ini dipilih karena SUDAH punya fondasi data riil dari
+Change Request GIS sebelumnya (Overpass untuk jalan, InaRisk untuk
+risiko) -- bukan pilihan sembarangan. 5 dimensi lain (Aksesibilitas,
+Logistik, Potensi Industri, Sosial Ekonomi, dan Infrastruktur yang
+masih perlu 1 indikator lagi) masih menunggu riset sumber data di CR
+berikutnya, satu atau dua dimensi per CR sesuai rencana semula.

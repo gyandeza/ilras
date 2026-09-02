@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchDistricts, fetchRoadsLayer, fetchRiskLayer, fetchBoundary } from '../lib/dataService.js';
 import { getBandColor } from '../lib/ilri.js';
-import DistrictMap from '../components/organisms/DistrictMap.jsx';
+import DistrictMap, { ROAD_LEGEND } from '../components/organisms/DistrictMap.jsx';
 import { useDistrictContext } from '../layout/DistrictContext.jsx';
 
 export default function GISExplorerPage() {
@@ -117,6 +117,16 @@ export default function GISExplorerPage() {
             Jalan Utama {roadsStatus === 'loading' && showRoads && <span className="gis-layer-toggle__status">memuat...</span>}
             {roadsStatus === 'error' && <span className="gis-layer-toggle__status gis-layer-toggle__status--error">gagal</span>}
           </label>
+          {showRoads && roadsStatus === 'ready' && (
+            <div className="road-legend">
+              {ROAD_LEGEND.map((r) => (
+                <div key={r.key} className="road-legend__item">
+                  <span className="road-legend__swatch" style={{ background: r.color }} />
+                  <span>{r.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <label className="gis-layer-toggle">
             <input type="checkbox" checked={showRisk} onChange={(e) => setShowRisk(e.target.checked)} />
             Zona Risiko Banjir {riskStatus === 'loading' && showRisk && <span className="gis-layer-toggle__status">memuat...</span>}

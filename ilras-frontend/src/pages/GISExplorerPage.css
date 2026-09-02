@@ -86,6 +86,26 @@
 .gis-layer-toggle__status--error {
   color: var(--band-belum-siap);
 }
+.road-legend {
+  padding: 6px 4px 10px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.road-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--color-muted);
+}
+.road-legend__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
 @media (max-width: 900px) {
   .gis-layout {
     grid-template-columns: 1fr;

@@ -18,7 +18,7 @@ export default function DistrictDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [district, setDistrict] = useState(null);
-  const [indicators, setIndicators] = useState([]);
+  const [indicatorsByDimension, setIndicatorsByDimension] = useState({});
   const [recommendation, setRecommendation] = useState(null);
   const [boundary, setBoundary] = useState(null);
   const [history, setHistory] = useState([]);
@@ -47,7 +47,21 @@ export default function DistrictDetailPage() {
         setError(err.message);
         setStatus('error');
       });
-    fetchIndicators('infrastructure', id).then(setIndicators).catch(() => setIndicators([]));
+    // Fetch indicators for every dimension, but only render a section
+    // for dimensions that actually have some -- most dimensions don't
+    // have curated indicators yet (Essential Feature #2 is filled in
+    // dimension-by-dimension across multiple CRs, not all at once).
+    Promise.allSettled(
+      DIMENSIONS.map((dim) => fetchIndicators(dim.key, id).then((list) => ({ key: dim.key, list })))
+    ).then((results) => {
+      const byDim = {};
+      results.forEach((r) => {
+        if (r.status === 'fulfilled' && r.value.list.length > 0) {
+          byDim[r.value.key] = r.value.list;
+        }
+      });
+      setIndicatorsByDimension(byDim);
+    });
     fetchRecommendation(id).then(setRecommendation).catch(() => setRecommendation(null));
     fetchBoundary(id).then(setBoundary).catch(() => setBoundary(null));
     fetchHistory(id).then(setHistory).catch(() => setHistory([]));
@@ -128,12 +142,14 @@ export default function DistrictDetailPage() {
               />
             ))}
           </div>
-          <div className="panel" style={{ marginBottom: 18 }}>
-            <div className="panel__heading">Contoh Indikator — Infrastruktur</div>
-            {indicators.map((ind) => (
-              <IndicatorItem key={ind.title} indicator={ind} />
-            ))}
-          </div>
+          {DIMENSIONS.filter((dim) => indicatorsByDimension[dim.key]?.length > 0).map((dim) => (
+            <div key={dim.key} className="panel" style={{ marginBottom: 18 }}>
+              <div className="panel__heading">Contoh Indikator — {dim.label}</div>
+              {indicatorsByDimension[dim.key].map((ind) => (
+                <IndicatorItem key={ind.title} indicator={ind} />
+              ))}
+            </div>
+          ))}
           <RecommendationPanel data={recommendation} />
           <div style={{ marginTop: 18 }}>
             <ExecutiveSummaryPanel district={district} recommendation={recommendation} />
