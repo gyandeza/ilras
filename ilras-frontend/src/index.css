@@ -16,6 +16,7 @@
 @import './components/organisms/RecommendationPanel.css';
 @import './components/organisms/HistoryTimeline.css';
 @import './components/organisms/ExecutiveSummaryPanel.css';
+@import './components/organisms/RoadAnalysisPanel.css';
 
 @import './layout/AppLayout.css';
 @import './pages/DashboardPage.css';

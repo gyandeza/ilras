@@ -12,6 +12,7 @@ import DistrictMap from '../components/organisms/DistrictMap.jsx';
 import RecommendationPanel from '../components/organisms/RecommendationPanel.jsx';
 import HistoryTimeline from '../components/organisms/HistoryTimeline.jsx';
 import ExecutiveSummaryPanel from '../components/organisms/ExecutiveSummaryPanel.jsx';
+import RoadAnalysisPanel from '../components/organisms/RoadAnalysisPanel.jsx';
 import { useDistrictContext } from '../layout/DistrictContext.jsx';
 
 export default function DistrictDetailPage() {
@@ -151,6 +152,9 @@ export default function DistrictDetailPage() {
             </div>
           ))}
           <RecommendationPanel data={recommendation} />
+          <div style={{ marginTop: 18 }}>
+            <RoadAnalysisPanel districtId={district.id} />
+          </div>
           <div style={{ marginTop: 18 }}>
             <ExecutiveSummaryPanel district={district} recommendation={recommendation} />
           </div>

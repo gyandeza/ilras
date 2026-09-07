@@ -15,6 +15,33 @@ CACHE_TTL = timedelta(days=7)  # road networks don't change often; avoid hammeri
 BOUNDARY_CACHE_TTL = timedelta(days=90)  # administrative boundaries change extremely rarely
 
 
+async def _get_roads_geojson(district: District, db: Session) -> dict:
+    """
+    Shared fetch-or-cache logic for road data, used by both the raw
+    map layer endpoint and the road-length analysis endpoint below --
+    avoids duplicating the Overpass fetch + cache-fallback logic.
+    """
+    cached = (
+        db.query(GisLayerCache)
+        .filter(GisLayerCache.district_id == district.id, GisLayerCache.layer_type == "roads")
+        .order_by(GisLayerCache.fetched_at.desc())
+        .first()
+    )
+    if cached and datetime.now(timezone.utc) - cached.fetched_at.replace(tzinfo=timezone.utc) < CACHE_TTL:
+        return json.loads(cached.geojson)
+
+    try:
+        geojson = await gis_layers.fetch_osm_roads(district.lat, district.lng)
+    except (httpx.HTTPError, httpx.TimeoutException) as e:
+        if cached:
+            return json.loads(cached.geojson)
+        raise HTTPException(status_code=502, detail=f"Gagal mengambil data jalan dari OpenStreetMap: {e}")
+
+    db.add(GisLayerCache(district_id=district.id, layer_type="roads", geojson=json.dumps(geojson)))
+    db.commit()
+    return geojson
+
+
 @router.get("/{district_id}/layers/roads")
 async def get_roads_layer(district_id: str, db: Session = Depends(get_db)):
     district = db.get(District, district_id)
@@ -23,29 +50,26 @@ async def get_roads_layer(district_id: str, db: Session = Depends(get_db)):
     if district.lat is None or district.lng is None:
         raise HTTPException(status_code=422, detail="Kecamatan ini tidak memiliki data lokasi")
 
-    cached = (
-        db.query(GisLayerCache)
-        .filter(GisLayerCache.district_id == district_id, GisLayerCache.layer_type == "roads")
-        .order_by(GisLayerCache.fetched_at.desc())
-        .first()
-    )
-    if cached and datetime.now(timezone.utc) - cached.fetched_at.replace(tzinfo=timezone.utc) < CACHE_TTL:
-        return {"geojson": json.loads(cached.geojson), "cached": True, "fetched_at": cached.fetched_at}
+    geojson = await _get_roads_geojson(district, db)
+    return {"geojson": geojson, "fetched_at": datetime.now(timezone.utc)}
 
-    try:
-        geojson = await gis_layers.fetch_osm_roads(district.lat, district.lng)
-    except (httpx.HTTPError, httpx.TimeoutException) as e:
-        # Degrade gracefully: if we have a stale cache, serve it anyway
-        # rather than showing nothing. Only fail hard if we have never
-        # successfully fetched this district before.
-        if cached:
-            return {"geojson": json.loads(cached.geojson), "cached": True, "stale": True, "fetched_at": cached.fetched_at}
-        raise HTTPException(status_code=502, detail=f"Gagal mengambil data jalan dari OpenStreetMap: {e}")
 
-    db.add(GisLayerCache(district_id=district_id, layer_type="roads", geojson=json.dumps(geojson)))
-    db.commit()
+@router.get("/{district_id}/layers/roads/analysis")
+async def get_roads_analysis(district_id: str, db: Session = Depends(get_db)):
+    """
+    Road Accessibility Analysis (EPIC 3): real geodesic length per
+    road class, computed from the same OSM data as the map layer.
+    Deliberately does NOT return an ILRI-ready score -- see
+    gis_layers.compute_road_lengths for why.
+    """
+    district = db.get(District, district_id)
+    if not district:
+        raise HTTPException(status_code=404, detail=f'Kecamatan "{district_id}" tidak ditemukan')
+    if district.lat is None or district.lng is None:
+        raise HTTPException(status_code=422, detail="Kecamatan ini tidak memiliki data lokasi")
 
-    return {"geojson": geojson, "cached": False, "fetched_at": datetime.now(timezone.utc)}
+    geojson = await _get_roads_geojson(district, db)
+    return gis_layers.compute_road_lengths(geojson)
 
 
 @router.get("/{district_id}/layers/risk")

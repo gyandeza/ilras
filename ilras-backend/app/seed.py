@@ -83,6 +83,15 @@ DATA_SOURCES = [
         "contact_email": "bps1406@bps.go.id",
         "last_verified_at": datetime(2025, 12, 1, tzinfo=timezone.utc),
     },
+    {
+        "agency": "Kementerian PUPR \u2014 Badan Pengatur Jalan Tol (BPJT)",
+        "document_name": "Jalan Tol Beroperasi (Satu Data PU)",
+        "document_url": "https://data.pu.go.id/dataset/jalan-tol-beroperasi",
+        "source_type": "api",
+        "contact_phone": None,
+        "contact_email": "informasibpjt@pu.go.id",
+        "last_verified_at": datetime(2026, 8, 21, tzinfo=timezone.utc),
+    },
 ]
 
 INDICATORS = [
@@ -93,6 +102,7 @@ INDICATORS = [
     {"dimension_key": "socio", "title": "Kepadatan Penduduk", "source_index": 4},
     {"dimension_key": "socio", "title": "Angkatan Kerja", "source_index": 4},
     {"dimension_key": "industrial", "title": "Kontribusi Sektor Industri Pengolahan terhadap PDRB", "source_index": 5},
+    {"dimension_key": "logistics", "title": "Ketersediaan Akses Jalan Tol Trans Sumatera", "source_index": 6},
 ]
 
 

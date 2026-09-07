@@ -285,3 +285,56 @@ ditemukan -- lebih baik 1 indikator solid daripada 2 indikator dengan
 **Progres Essential #2:** Infrastruktur (2), Konektivitas (1), Risiko
 (1), Sosial Ekonomi (2), Potensi Industri (1) -- total 5 dari 7
 dimensi. Tersisa: Aksesibilitas, Logistik.
+
+## Essential #2 — Dimensi Logistik, dan Status Aksesibilitas (pasca Potensi Industri)
+
+1 indikator baru: "Ketersediaan Akses Jalan Tol Trans Sumatera" --
+sumber Kementerian PUPR / BPJT, dataset resmi "Jalan Tol Beroperasi"
+(Satu Data PU). Ruas nyata yang relevan untuk Kampar: Tol
+Pekanbaru-Bangkinang (31 km, beroperasi sejak Jan 2023) dan
+Bangkinang-XIII Koto Kampar (24,7 km).
+
+**Aksesibilitas SENGAJA tidak ditambahkan indikator baru.** Riset
+mengonfirmasi ulang temuan Sprint 0: Aksesibilitas (waktu tempuh ke
+pelabuhan/bandara/jalan tol) secara inheren adalah metrik TERHITUNG
+(butuh mesin routing dari data jalan), bukan sesuatu yang diterbitkan
+Dinas sebagai dokumen yang bisa disitasi. Data BPS soal transportasi
+yang ditemukan levelnya provinsi/nasional dan soal VOLUME (jumlah
+penumpang/kargo), bukan waktu tempuh per kecamatan. Membangun indikator
+"Aksesibilitas" sekarang berarti mengarang angka, atau butuh
+infrastruktur baru (routing engine seperti OSRM) yang belum ada.
+
+**Essential #2 -- status akhir sesi ini:** 6 dari 7 dimensi punya
+indikator riil. Aksesibilitas tetap kosong -- ini keputusan sadar,
+bukan pekerjaan yang terlewat.
+
+## EPIC 3 — Advanced GIS (pasca Essential #2 Logistik)
+
+**Road Layer Filtering:** endpoint `/layers/roads` tidak berubah secara
+API, tapi frontend sekarang mem-fetch sekali lalu filter per kelas
+jalan di sisi klien (5 kelas: motorway/trunk/primary/secondary/tertiary
+-- persis yang sudah kita tarik dari Overpass sejak CR GIS pertama,
+BUKAN kategori baru yang datanya tidak ada).
+
+**Batasan yang sengaja dijaga (bukan terlewat):** brief awal meminta
+filter untuk "Jalan Lokal", "Jalan Industri", dan klasifikasi
+fungsi jalan (Arteri/Kolektor). Ini TIDAK diimplementasikan karena:
+- "Jalan Industri" bukan tag standar OSM -- tidak ada cara reliable
+  mengidentifikasinya dari data yang kita punya
+- Arteri/Kolektor adalah sistem klasifikasi FUNGSI jalan, berbeda dari
+  hierarki ADMINISTRATIF yang dipakai OSM (national/provincial/dst) --
+  keduanya tidak bisa dipetakan 1:1 tanpa data tambahan
+
+**Road Accessibility Analysis:** endpoint baru
+`GET /districts/{id}/layers/roads/analysis` (`gis_layers.compute_road_lengths`)
+menghitung panjang jalan RIIL per kelas menggunakan formula haversine
+standar (diverifikasi: jarak Jakarta-Bandung dari fungsi ini = 117.8 km,
+sesuai geografi nyata).
+
+**Keputusan metodologi yang sengaja dijaga:** endpoint ini
+mengembalikan panjang mentah (km), BUKAN skor 0-100 yang siap masuk
+ILRI. Mengubah "185 km jalan nasional" jadi skor butuh nilai acuan
+(berapa km/km\u00b2 yang dianggap "baik"?) yang belum ada -- itu
+pertanyaan Essential #4 (metodologi agregasi indikator-ke-dimensi)
+yang belum diselesaikan. Menyajikan angka mentah yang jujur lebih baik
+daripada skor yang terlihat presisi padahal dasarnya karangan.

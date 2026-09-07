@@ -175,3 +175,15 @@ src/
   loads -- untested visually in the sandbox since Overpass is blocked
   there, but the conditional logic was code-reviewed and the color
   values are the single source of truth shared with the map itself.
+
+## EPIC 3 notes (Road Layer Filtering + Road Accessibility Analysis)
+
+- GIS Explorer's single "Jalan Utama" toggle replaced with 5 per-class
+  checkboxes (fetched once, filtered client-side via `useMemo` --
+  toggling a class never re-fetches from Overpass).
+- "Legenda Aktif" is a distinct section that only lists currently
+  checked classes -- verified live: 1 checked -> 1 legend item, 2
+  checked -> 2 legend items.
+- `RoadAnalysisPanel` on District Detail shows real per-class road
+  length (km), sourced from the same Overpass data as the map layer.
+  Explicitly labeled as NOT an ILRI indicator yet.

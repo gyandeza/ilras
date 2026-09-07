@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchDistricts, fetchRoadsLayer, fetchRiskLayer, fetchBoundary } from '../lib/dataService.js';
 import { getBandColor } from '../lib/ilri.js';
 import DistrictMap, { ROAD_LEGEND } from '../components/organisms/DistrictMap.jsx';
 import { useDistrictContext } from '../layout/DistrictContext.jsx';
 
+const DEFAULT_ROAD_FILTERS = Object.fromEntries(ROAD_LEGEND.map((r) => [r.key, false]));
+
 export default function GISExplorerPage() {
   const [districts, setDistricts] = useState(null);
   const [error, setError] = useState(null);
-  const [showRoads, setShowRoads] = useState(false);
+  const [roadClassFilters, setRoadClassFilters] = useState(DEFAULT_ROAD_FILTERS);
   const [showRisk, setShowRisk] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(true);
   const [roadLayers, setRoadLayers] = useState([]);
@@ -20,6 +22,8 @@ export default function GISExplorerPage() {
   const navigate = useNavigate();
   const { setActiveDistrict, setBreadcrumb } = useDistrictContext();
 
+  const anyRoadClassChecked = Object.values(roadClassFilters).some(Boolean);
+
   useEffect(() => {
     setActiveDistrict(null);
     setBreadcrumb('Peta');
@@ -29,7 +33,7 @@ export default function GISExplorerPage() {
   }, [setActiveDistrict, setBreadcrumb]);
 
   useEffect(() => {
-    if (!showRoads || !districts || roadLayers.length > 0) return;
+    if (!anyRoadClassChecked || !districts || roadLayers.length > 0) return;
     setRoadsStatus('loading');
     Promise.all(districts.map((d) => fetchRoadsLayer(d.id).then((res) => ({ districtId: d.id, geojson: res.geojson }))))
       .then((results) => {
@@ -37,7 +41,7 @@ export default function GISExplorerPage() {
         setRoadsStatus('ready');
       })
       .catch(() => setRoadsStatus('error'));
-  }, [showRoads, districts, roadLayers.length]);
+  }, [anyRoadClassChecked, districts, roadLayers.length]);
 
   useEffect(() => {
     if (!showRisk || !districts || riskLayers.length > 0) return;
@@ -67,6 +71,26 @@ export default function GISExplorerPage() {
       });
   }, [showBoundaries, districts, boundaries.length]);
 
+  // Filter fetched road data down to only the classes currently
+  // checked -- fetched once per district, filtered client-side, so
+  // toggling individual classes never triggers a re-fetch.
+  const filteredRoadLayers = useMemo(() => {
+    if (!anyRoadClassChecked) return [];
+    return roadLayers.map((layer) => ({
+      ...layer,
+      geojson: {
+        ...layer.geojson,
+        features: layer.geojson.features.filter((f) => roadClassFilters[f.properties.highway]),
+      },
+    }));
+  }, [roadLayers, roadClassFilters, anyRoadClassChecked]);
+
+  const visibleLegend = ROAD_LEGEND.filter((r) => roadClassFilters[r.key]);
+
+  function toggleRoadClass(key) {
+    setRoadClassFilters((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
   if (error) {
     return (
       <p className="page-sub" style={{ color: 'var(--band-belum-siap)' }}>
@@ -91,7 +115,7 @@ export default function GISExplorerPage() {
             onMarkerClick={(id) => navigate(`/district/${id}`)}
             zoom={10}
             height={520}
-            roadLayers={showRoads ? roadLayers : []}
+            roadLayers={filteredRoadLayers}
             riskLayers={showRisk ? riskLayers : []}
             boundaries={showBoundaries ? boundaries : []}
           />
@@ -112,14 +136,28 @@ export default function GISExplorerPage() {
             Batas Kecamatan (BIG) {boundaryStatus === 'loading' && showBoundaries && <span className="gis-layer-toggle__status">memuat...</span>}
             {boundaryStatus === 'error' && <span className="gis-layer-toggle__status gis-layer-toggle__status--error">tidak ditemukan</span>}
           </label>
-          <label className="gis-layer-toggle">
-            <input type="checkbox" checked={showRoads} onChange={(e) => setShowRoads(e.target.checked)} />
-            Jalan Utama {roadsStatus === 'loading' && showRoads && <span className="gis-layer-toggle__status">memuat...</span>}
-            {roadsStatus === 'error' && <span className="gis-layer-toggle__status gis-layer-toggle__status--error">gagal</span>}
-          </label>
-          {showRoads && roadsStatus === 'ready' && (
-            <div className="road-legend">
-              {ROAD_LEGEND.map((r) => (
+
+          <div className="road-filter-group">
+            <div className="road-filter-group__title">
+              Jalan per Kelas {roadsStatus === 'loading' && anyRoadClassChecked && <span className="gis-layer-toggle__status">memuat...</span>}
+              {roadsStatus === 'error' && <span className="gis-layer-toggle__status gis-layer-toggle__status--error">gagal</span>}
+            </div>
+            {ROAD_LEGEND.map((r) => (
+              <label key={r.key} className="road-filter-item">
+                <input
+                  type="checkbox"
+                  checked={roadClassFilters[r.key]}
+                  onChange={() => toggleRoadClass(r.key)}
+                />
+                <span className="road-legend__swatch" style={{ background: r.color }} />
+                <span>{r.label}</span>
+              </label>
+            ))}
+          </div>
+          {visibleLegend.length > 0 && (
+            <div className="road-legend road-legend--active">
+              <div className="road-legend__title">Legenda Aktif</div>
+              {visibleLegend.map((r) => (
                 <div key={r.key} className="road-legend__item">
                   <span className="road-legend__swatch" style={{ background: r.color }} />
                   <span>{r.label}</span>
@@ -127,6 +165,7 @@ export default function GISExplorerPage() {
               ))}
             </div>
           )}
+
           <label className="gis-layer-toggle">
             <input type="checkbox" checked={showRisk} onChange={(e) => setShowRisk(e.target.checked)} />
             Zona Risiko Banjir {riskStatus === 'loading' && showRisk && <span className="gis-layer-toggle__status">memuat...</span>}
@@ -140,8 +179,11 @@ export default function GISExplorerPage() {
           <div className="gis-layout__note">
             Kawasan Industri belum tersedia — data ada di portal Disperindag
             Riau (sepat.riau.go.id/mapki) namun belum memiliki API publik.
-            Batas kecamatan dari BIG (edisi 2022); Jalan dari OpenStreetMap;
-            Zona Risiko dari InaRisk BNPB.
+            Filter jalan hanya mencakup 5 kelas hierarki administratif yang
+            tersedia di OpenStreetMap — "Jalan Industri" dan klasifikasi
+            fungsi jalan (Arteri/Kolektor) belum dapat ditampilkan karena
+            data untuk itu tidak tersedia di sumber ini. Batas kecamatan
+            dari BIG (edisi 2022); Zona Risiko dari InaRisk BNPB.
           </div>
         </div>
       </div>
