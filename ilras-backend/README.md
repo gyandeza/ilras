@@ -338,3 +338,34 @@ ILRI. Mengubah "185 km jalan nasional" jadi skor butuh nilai acuan
 pertanyaan Essential #4 (metodologi agregasi indikator-ke-dimensi)
 yang belum diselesaikan. Menyajikan angka mentah yang jujur lebih baik
 daripada skor yang terlihat presisi padahal dasarnya karangan.
+
+## EPIC 5 — Trend & Monitoring (pasca EPIC 3)
+
+**Tidak ada perubahan backend baru** -- `GET /districts/{id}/history`
+(dibangun untuk Timeline di CR Quick Wins) ternyata sudah menyediakan
+semua data yang dibutuhkan grafik tren: timestamp + result_score per
+entri `score_view`.
+
+**Keputusan metodologi yang sengaja dijaga (paling penting di CR ini):**
+brief awal meminta "Historical Snapshot" (2024/2025/2026) dan "Forecast"
+(2027/2028). KEDUANYA tidak diimplementasikan sebagai diminta:
+
+- **Historical Snapshot multi-tahun**: sistem ini adalah pilot baru,
+  tidak punya data historis riil yang membentang bertahun-tahun.
+  Membuat tabel snapshot berlabel "2024/2025/2026" berarti mengarang
+  data yang tidak pernah benar-benar terjadi. Sebagai gantinya,
+  `audit_log` yang SUDAH ADA dan SUDAH NYATA dipakai sebagai riwayat
+  skor -- apa adanya, sesedikit apa pun datanya.
+- **Forecast 2027/2028**: TIDAK diimplementasikan sama sekali.
+  Ekstrapolasi (bahkan linear sederhana) butuh minimal 2 titik data
+  riil untuk sekadar menggambar garis. Dengan riwayat yang masih
+  sangat pendek (baru berjalan sejak deployment), forecast akan
+  terlihat presisi secara statistik padahal dasarnya nyaris kosong.
+  Ini didokumentasikan secara eksplisit di UI (`ScoreTrendChart.jsx`),
+  bukan diam-diam dihilangkan.
+
+**Verifikasi live:** diuji 3 skenario nyata (0 titik, 1 titik, 2+
+titik data) dengan kunjungan berulang ke kecamatan yang sama --
+komponen frontend menangani ketiganya dengan pesan yang sesuai,
+transisi otomatis dari pesan "belum cukup data" ke grafik nyata begitu
+titik data kedua tercatat.

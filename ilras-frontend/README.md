@@ -187,3 +187,19 @@ src/
 - `RoadAnalysisPanel` on District Detail shows real per-class road
   length (km), sourced from the same Overpass data as the map layer.
   Explicitly labeled as NOT an ILRI indicator yet.
+
+## EPIC 5 notes (Trend & Monitoring)
+
+- `ScoreTrendChart` reuses the existing `/history` endpoint data --
+  no new backend endpoint needed.
+- Filters to `action === 'score_view'` only -- simulation results are
+  hypothetical what-if scores, mixing them into a "trend" would
+  misrepresent the district's actual recorded history.
+- Handles 0/1/2+ real data points with honestly different messaging
+  for each case (verified live across all three states).
+- Marks methodology version transitions on the chart (dashed vertical
+  line) when present in the data -- reuses the `methodology_changed`
+  flag already computed by the history endpoint.
+- Forecasting is explicitly NOT implemented -- see backend README for
+  the full reasoning. The omission is documented in-component, not
+  silently missing.

@@ -15,6 +15,7 @@
 @import './components/organisms/DistrictMap.css';
 @import './components/organisms/RecommendationPanel.css';
 @import './components/organisms/HistoryTimeline.css';
+@import './components/organisms/ScoreTrendChart.css';
 @import './components/organisms/ExecutiveSummaryPanel.css';
 @import './components/organisms/RoadAnalysisPanel.css';
 

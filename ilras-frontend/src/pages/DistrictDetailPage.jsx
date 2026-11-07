@@ -11,6 +11,7 @@ import IndicatorItem from '../components/molecules/IndicatorItem.jsx';
 import DistrictMap from '../components/organisms/DistrictMap.jsx';
 import RecommendationPanel from '../components/organisms/RecommendationPanel.jsx';
 import HistoryTimeline from '../components/organisms/HistoryTimeline.jsx';
+import ScoreTrendChart from '../components/organisms/ScoreTrendChart.jsx';
 import ExecutiveSummaryPanel from '../components/organisms/ExecutiveSummaryPanel.jsx';
 import RoadAnalysisPanel from '../components/organisms/RoadAnalysisPanel.jsx';
 import { useDistrictContext } from '../layout/DistrictContext.jsx';
@@ -157,6 +158,10 @@ export default function DistrictDetailPage() {
           </div>
           <div style={{ marginTop: 18 }}>
             <ExecutiveSummaryPanel district={district} recommendation={recommendation} />
+          </div>
+          <div className="panel" style={{ marginTop: 18 }}>
+            <div className="panel__heading">Tren Skor</div>
+            <ScoreTrendChart entries={history} />
           </div>
           <div className="panel" style={{ marginTop: 18 }}>
             <div className="panel__heading">Riwayat Perubahan</div>
