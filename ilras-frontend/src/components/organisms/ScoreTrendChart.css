@@ -1,0 +1,64 @@
+.trend-empty,
+.trend-single {
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+.trend-single strong {
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+}
+.trend-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.trend-chart__axis {
+  stroke: var(--color-line);
+  stroke-width: 1;
+}
+.trend-chart__line {
+  stroke: var(--color-primary-600);
+  stroke-width: 2;
+}
+.trend-chart__dot {
+  fill: var(--color-primary-600);
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.trend-chart__methodology-marker {
+  stroke: var(--band-cukup-siap);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+}
+.trend-chart__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-muted);
+  padding: 0 4px;
+  margin-top: 2px;
+}
+.trend-chart__legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--color-muted);
+  margin-top: 8px;
+}
+.trend-chart__legend-marker {
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  background: var(--band-cukup-siap);
+}
+.trend-note {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-line);
+  font-size: 10.5px;
+  color: var(--color-muted);
+  font-style: italic;
+  line-height: 1.5;
+}
